@@ -107,6 +107,30 @@ You can easily switch to using custom annotations to leverage aspects in a simpl
 }
 ```
 
+### cURL Example
+
+```bash
+curl -X POST http://localhost:8080/api/deals/import \\
+  -H "Content-Type: application/json" \\
+  -d '[
+    {
+      "dealUniqueId": "DEAL12345",
+      "fromCurrencyIsoCode": "USD",
+      "toCurrencyIsoCode": "EUR",
+      "dealTimestamp": "2025-08-04T14:30:00Z",
+      "dealAmountInOrderingCurrency": 25000.75
+    },
+    {
+      "dealUniqueId": "DEAL67890",
+      "fromCurrencyIsoCode": "GBP",
+      "toCurrencyIsoCode": "JPY",
+      "dealTimestamp": "2025-08-05T09:15:00Z",
+      "dealAmountInOrderingCurrency": 100000.00
+    }
+  ]'
+```
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -162,19 +186,6 @@ The project includes comprehensive test coverage for:
 - **Security Aspects**: Cross-cutting security concerns
 
 
-### Environment Variables
-```bash
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=fx_deals
-DB_USERNAME=admin
-DB_PASSWORD=password
-
-# Application Configuration
-SERVER_PORT=8080
-LOG_LEVEL=INFO
-```
 
 ### Docker Environment
 All configurations are externalized and can be overridden via environment variables or Docker Compose.
