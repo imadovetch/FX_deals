@@ -2,16 +2,19 @@ package org.bloomberg.fx_deals.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.bloomberg.fx_deals.Annotation.MarkFunction;
 import org.bloomberg.fx_deals.Mapper.DealMapper;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
+import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
 import org.bloomberg.fx_deals.Model.Entity.Deal;
 import org.bloomberg.fx_deals.repository.DealRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +30,33 @@ public class DealService {
      * Already filtered duplicates by validation AOP.
      */
 
+//    @MarkFunction("SaveMultipleDeals")
 
-    public void saveAll(List<DealDto> dealDtos) {
+    public ImportResultDto saveAll(List<DealDto> dealDtos) {
+        if (dealDtos == null || dealDtos.isEmpty()) {
+            logger.warn("No deals provided for saving");
+            return new ImportResultDto(List.of(), List.of());
+        }
 
-        List<Deal> deals = dealDtos.stream()
-                .map(dealMapper::toEntity)
-                .toList();
+        List<String> successfulDeals = new ArrayList<>();
+        List<String> failedDeals = new ArrayList<>();
 
-        for (Deal deal : deals) {
+        for (DealDto dto : dealDtos) {
             try {
+                Deal deal = dealMapper.toEntity(dto); // catch mapping errors here
                 dealRepository.save(deal);
+                successfulDeals.add(deal.getDealUniqueId());
                 logger.info("Saved deal with ID: {}", deal.getDealUniqueId());
             } catch (Exception e) {
-                logger.error("Failed to save deal with ID: {}. Continuing with others.", deal.getDealUniqueId(), e);
+                failedDeals.add(dto.getDealUniqueId());
+                logger.error("Failed to save deal with ID: {}. Error: {}", dto.getDealUniqueId(), e.getMessage(), e);
             }
         }
+
+        logger.info("Import completed. Successful: {}, Failed: {}", successfulDeals.size(), failedDeals.size());
+
+        return new ImportResultDto(successfulDeals, failedDeals);
     }
+
+
 }

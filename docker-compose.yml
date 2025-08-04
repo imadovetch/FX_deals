@@ -2,29 +2,71 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
-    container_name: fxdeal-postgres
-    restart: always
+    image: postgres:15-alpine
+    container_name: fx-deals-postgres
     environment:
+      POSTGRES_DB: fxdeals
       POSTGRES_USER: fxuser
       POSTGRES_PASSWORD: fxpass
-      POSTGRES_DB: fxdeals
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - fx-deals-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fxuser -d fxdeals"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fx-deals-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fx-deals-app
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fxdeals
+      SPRING_DATASOURCE_USERNAME: fxuser
+      SPRING_DATASOURCE_PASSWORD: fxpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fx-deals-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: fxdeal-pgadmin
-    restart: always
+    container_name: fx-deals-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@fx.com
+      PGADMIN_DEFAULT_EMAIL: admin@fxdeals.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
       - "5050:80"
     depends_on:
       - postgres
+    networks:
+      - fx-deals-network
+    profiles:
+      - tools
 
 volumes:
-  pgdata:
+  postgres_data:
+
+networks:
+  fx-deals-network:
+    driver: bridge

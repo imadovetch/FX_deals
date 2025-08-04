@@ -1,125 +1,153 @@
 package org.bloomberg.fx_deals.Exceptions;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RestControllerAdvice
 public class GlobalHandler {
 
-    // Handle InvalidPasswordException
-    @ExceptionHandler(value = InvalidPasswordException.class)
-    public ResponseEntity<Object> handleInvalidPasswordException(InvalidPasswordException ex) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), "Authentication failed", ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
-    }
-
-    // Handle validation errors
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    /**
+     * Handles validation errors from @Valid annotated DTOs in request bodies.
+     * Returns a structured JSON with errors grouped by list index and field.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
+        Map<String, List<Map<String, String>>> errorsGroupedByIndex = new HashMap<>();
+
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            String field = error.getField(); // e.g. "dealDtos[0].dealUniqueId"
+            // Extract the index and the actual property name
+            String index = "unknown";
+            String property = field;
+
+            // Regex to extract index from something like "dealDtos[0].dealUniqueId"
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(".*\\[(\\d+)\\]\\.(.+)");
+            java.util.regex.Matcher matcher = pattern.matcher(field);
+
+            if (matcher.matches()) {
+                index = matcher.group(1);       // e.g. "0"
+                property = matcher.group(2);    // e.g. "dealUniqueId"
+            }
+
+            Map<String, String> errorDetails = Map.of(
+                    "property", property,
+                    "message", error.getDefaultMessage()
+            );
+
+            errorsGroupedByIndex.computeIfAbsent(index, k -> new java.util.ArrayList<>()).add(errorDetails);
+        }
+
+        Map<String, Object> responseBody = Map.of(
+                "timestamp", Instant.now(),
+                "type", "Validation Error",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "errors", errorsGroupedByIndex
         );
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
     }
 
-    // Handle ConstraintViolationException (e.g., @Validated violations)
-    @ExceptionHandler(value = ConstraintViolationException.class)
+
+    /**
+     * Handles ConstraintViolationException from @Validated method parameters.
+     * Returns errors with property path and message in a list.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation ->
-                errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+        Map<String, List<Map<String, String>>> errorsGroupedByIndex = new HashMap<>();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            String path = violation.getPropertyPath().toString(); // e.g. "importDeals.dealDtos[0].dealUniqueId"
+            String index = "unknown";
+            String property = path;
+
+            // Extract index and property name using regex
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(".*\\[(\\d+)\\]\\.(.+)");
+            java.util.regex.Matcher matcher = pattern.matcher(path);
+
+            if (matcher.matches()) {
+                index = matcher.group(1);
+                property = matcher.group(2);
+            }
+
+            Map<String, String> errorDetails = Map.of(
+                    "property", property,
+                    "message", violation.getMessage()
+            );
+
+            errorsGroupedByIndex.computeIfAbsent(index, k -> new java.util.ArrayList<>()).add(errorDetails);
+        });
+
+        Map<String, Object> responseBody = Map.of(
+                "timestamp", Instant.now(),
+                "type", "Validation Error",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "errors", errorsGroupedByIndex
         );
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
     }
 
-    // Handle DataIntegrityViolationException (e.g., unique constraint violations)
-    @ExceptionHandler(value = DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        String errorMessage = "Data integrity violation: " + ex.getMostSpecificCause().getMessage();
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), "Data Integrity Error", errorMessage, HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
-    }
 
-    // Handle UsernameNotFoundException
-    @ExceptionHandler(value = UsernameNotFoundException.class)
-    public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), "User Not Found", ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-    }
-
-    // Handle all other exceptions
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Object> handleGlobalException(Exception ex) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), "An unexpected error occurred", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    // The rest of your existing handlers remain unchanged
+    @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(),
-                "Request body is missing or unreadable",
-                "Required request body is missing or malformed: " + ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value());
+        ApiError errorDetails = new ApiError(
+                Instant.now(),
+                "Malformed Request",
+                "Request body is missing or malformed.",
+                HttpStatus.BAD_REQUEST.value()
+        );
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    // ErrorDetails class
-    public static class ErrorDetails {
-        private Date timestamp;
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        ApiError errorDetails = new ApiError(
+                Instant.now(),
+                "Database Error",
+                "A database error occurred: " + ex.getRootCause().getMessage(),
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGlobalException(Exception ex) {
+        ApiError errorDetails = new ApiError(
+                Instant.now(),
+                "Internal Server Error",
+                "An unexpected error occurred. Please try again later.",
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
+        );
+        // Optionally log ex here
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ApiError {
+        private Instant timestamp;
         private String type;
         private String message;
         private int status;
-
-        public ErrorDetails(Date timestamp, String type, String message, int status) {
-            this.timestamp = timestamp;
-            this.type = type;
-            this.message = message;
-            this.status = status;
-        }
-
-        // Getters and setters
-        public Date getTimestamp() {
-            return timestamp;
-        }
-
-        public void setTimestamp(Date timestamp) {
-            this.timestamp = timestamp;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
     }
 }

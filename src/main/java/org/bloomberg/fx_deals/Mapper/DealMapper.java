@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.Model.Mapper;
+package org.bloomberg.fx_deals.Mapper;
 
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.Entity.Deal;
