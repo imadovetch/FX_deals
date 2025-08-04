@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -194,7 +195,8 @@ class DealSaveAspectTest {
                 .dealUniqueId(dealId)
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(1000L)
+                .dealTimestamp(String.valueOf(Instant.ofEpochMilli(1000L)))
+
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.00"))
                 .build();
     }

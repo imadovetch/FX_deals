@@ -22,30 +22,27 @@ class DealMapperTest {
 
     @Test
     void toEntity_ValidDealDto_ReturnsCorrectDeal() {
-        // Given
+        Instant timestamp = Instant.parse("2022-01-01T00:00:00Z");
         DealDto dealDto = DealDto.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(1640995200000L) // 2022-01-01 00:00:00 UTC
+                .dealTimestamp(timestamp.toString())
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         Deal deal = dealMapper.toEntity(dealDto);
 
-        // Then
         assertNotNull(deal);
         assertEquals("DEAL001", deal.getDealUniqueId());
         assertEquals("USD", deal.getFromCurrencyIsoCode());
         assertEquals("EUR", deal.getToCurrencyIsoCode());
-        assertEquals(Instant.ofEpochMilli(1640995200000L), deal.getDealTimestamp());
+        assertEquals(timestamp, deal.getDealTimestamp());
         assertEquals(new BigDecimal("1000.50"), deal.getDealAmountInOrderingCurrency());
     }
 
     @Test
     void toEntity_NullTimestamp_ReturnsNullTimestamp() {
-        // Given
         DealDto dealDto = DealDto.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
@@ -54,10 +51,8 @@ class DealMapperTest {
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         Deal deal = dealMapper.toEntity(dealDto);
 
-        // Then
         assertNotNull(deal);
         assertEquals("DEAL001", deal.getDealUniqueId());
         assertNull(deal.getDealTimestamp());
@@ -65,30 +60,27 @@ class DealMapperTest {
 
     @Test
     void toDto_ValidDeal_ReturnsCorrectDealDto() {
-        // Given
+        Instant timestamp = Instant.parse("2022-01-01T00:00:00Z");
         Deal deal = Deal.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(Instant.ofEpochMilli(1640995200000L))
+                .dealTimestamp(timestamp)
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         DealDto dealDto = dealMapper.toDto(deal);
 
-        // Then
         assertNotNull(dealDto);
         assertEquals("DEAL001", dealDto.getDealUniqueId());
         assertEquals("USD", dealDto.getFromCurrencyIsoCode());
         assertEquals("EUR", dealDto.getToCurrencyIsoCode());
-        assertEquals(1640995200000L, dealDto.getDealTimestamp());
+        assertEquals(timestamp.toString(), dealDto.getDealTimestamp()); // String in DTO
         assertEquals(new BigDecimal("1000.50"), dealDto.getDealAmountInOrderingCurrency());
     }
 
     @Test
     void toDto_NullTimestamp_ReturnsNullTimestamp() {
-        // Given
         Deal deal = Deal.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
@@ -97,10 +89,8 @@ class DealMapperTest {
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         DealDto dealDto = dealMapper.toDto(deal);
 
-        // Then
         assertNotNull(dealDto);
         assertEquals("DEAL001", dealDto.getDealUniqueId());
         assertNull(dealDto.getDealTimestamp());
@@ -108,77 +98,69 @@ class DealMapperTest {
 
     @Test
     void toEntity_ZeroTimestamp_ReturnsCorrectInstant() {
-        // Given
+        Instant zeroInstant = Instant.EPOCH;
         DealDto dealDto = DealDto.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(0L)
+                .dealTimestamp(zeroInstant.toString())
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         Deal deal = dealMapper.toEntity(dealDto);
 
-        // Then
         assertNotNull(deal);
-        assertEquals(Instant.ofEpochMilli(0L), deal.getDealTimestamp());
+        assertEquals(zeroInstant, deal.getDealTimestamp());
     }
 
     @Test
-    void toDto_ZeroTimestamp_ReturnsCorrectLong() {
-        // Given
+    void toDto_ZeroTimestamp_ReturnsCorrectInstant() {
+        Instant zeroInstant = Instant.EPOCH;
         Deal deal = Deal.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(Instant.ofEpochMilli(0L))
+                .dealTimestamp(zeroInstant)
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         DealDto dealDto = dealMapper.toDto(deal);
 
-        // Then
         assertNotNull(dealDto);
-        assertEquals(0L, dealDto.getDealTimestamp());
+        assertEquals(zeroInstant.toString(), dealDto.getDealTimestamp());
     }
 
     @Test
     void toEntity_LargeTimestamp_ReturnsCorrectInstant() {
-        // Given
+        Instant farFuture = Instant.parse("9999-12-31T23:59:59Z");
         DealDto dealDto = DealDto.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(253402300799999L) // Year 9999
+                .dealTimestamp(farFuture.toString())
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         Deal deal = dealMapper.toEntity(dealDto);
 
-        // Then
         assertNotNull(deal);
-        assertEquals(Instant.ofEpochMilli(253402300799999L), deal.getDealTimestamp());
+        assertEquals(farFuture, deal.getDealTimestamp());
     }
 
     @Test
-    void toDto_LargeTimestamp_ReturnsCorrectLong() {
-        // Given
+    void toDto_LargeTimestamp_ReturnsCorrectInstant() {
+        Instant farFuture = Instant.parse("9999-12-31T23:59:59Z");
         Deal deal = Deal.builder()
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(Instant.ofEpochMilli(253402300799999L))
+                .dealTimestamp(farFuture)
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.50"))
                 .build();
 
-        // When
         DealDto dealDto = dealMapper.toDto(deal);
 
-        // Then
         assertNotNull(dealDto);
-        assertEquals(253402300799999L, dealDto.getDealTimestamp());
+        assertEquals(farFuture.toString(), dealDto.getDealTimestamp());
     }
-} 
+}

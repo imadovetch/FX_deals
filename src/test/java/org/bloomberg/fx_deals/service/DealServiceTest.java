@@ -44,7 +44,7 @@ class DealServiceTest {
                 .dealUniqueId("DEAL001")
                 .fromCurrencyIsoCode("USD")
                 .toCurrencyIsoCode("EUR")
-                .dealTimestamp(1000L)
+                .dealTimestamp(String.valueOf(Instant.ofEpochMilli(1000L)))
                 .dealAmountInOrderingCurrency(new BigDecimal("1000.00"))
                 .build();
 
@@ -84,7 +84,7 @@ class DealServiceTest {
                 .dealUniqueId("DEAL002")
                 .fromCurrencyIsoCode("EUR")
                 .toCurrencyIsoCode("GBP")
-                .dealTimestamp(2000L)
+                .dealTimestamp(String.valueOf(Instant.ofEpochMilli(2000L)))
                 .dealAmountInOrderingCurrency(new BigDecimal("2000.00"))
                 .build();
 
@@ -126,7 +126,7 @@ class DealServiceTest {
                 .dealUniqueId("DEAL002")
                 .fromCurrencyIsoCode("EUR")
                 .toCurrencyIsoCode("GBP")
-                .dealTimestamp(2000L)
+                .dealTimestamp(String.valueOf(Instant.ofEpochMilli(2000L)))
                 .dealAmountInOrderingCurrency(new BigDecimal("2000.00"))
                 .build();
 

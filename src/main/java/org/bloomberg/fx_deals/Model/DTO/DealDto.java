@@ -3,7 +3,10 @@ package org.bloomberg.fx_deals.Model.DTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import org.bloomberg.fx_deals.Annotation.VerifyInstantFormat;
+
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
@@ -25,8 +28,8 @@ public class DealDto {
     private String toCurrencyIsoCode;
 
     @NotNull(message = "Deal timestamp is required")
-    @Min(value = 0, message = "Deal timestamp must be a positive number")
-    private Long dealTimestamp;
+    @VerifyInstantFormat
+    private String dealTimestamp;
 
     @NotNull(message = "Deal Amount in ordering currency is required")
     @DecimalMin(value = "0.01", message = "Deal Amount must be greater than zero")
