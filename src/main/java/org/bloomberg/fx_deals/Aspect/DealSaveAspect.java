@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.aspect;
+package org.bloomberg.fx_deals.Aspect;
 
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -7,13 +7,12 @@ import org.aspectj.lang.annotation.Aspect;
 import org.bloomberg.fx_deals.Corevalidation.DealCoreValidation;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
-import org.bloomberg.fx_deals.context.DuplicateDealsContext;
+import org.bloomberg.fx_deals.Context.DuplicateDealsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Aspect
 @Component
@@ -24,7 +23,7 @@ public class DealSaveAspect {
 
     private final DealCoreValidation coreValidation;
 
-    @Around("execution(* org.bloomberg.fx_deals.service.DealService.saveAll(..)) && args(dealDtos)")
+    @Around("execution(* org.bloomberg.fx_deals.Service.DealService.saveAll(..)) && args(dealDtos)")
     public Object filterDuplicatesBeforeSave(ProceedingJoinPoint pjp, List<DealDto> dealDtos) throws Throwable {
         if (dealDtos == null || dealDtos.isEmpty()) {
             logger.info("No deals were passed");

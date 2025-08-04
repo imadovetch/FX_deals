@@ -1,9 +1,9 @@
-package org.bloomberg.fx_deals.aspect;
+package org.bloomberg.fx_deals.Aspect;
 
 import org.bloomberg.fx_deals.Corevalidation.DealCoreValidation;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
-import org.bloomberg.fx_deals.context.DuplicateDealsContext;
+import org.bloomberg.fx_deals.Context.DuplicateDealsContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

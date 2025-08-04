@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.controller;
+package org.bloomberg.fx_deals.Controller;
 
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.bloomberg.fx_deals.Helpers.ControllerHelper;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
-import org.bloomberg.fx_deals.context.DuplicateDealsContext;
-import org.bloomberg.fx_deals.service.DealService;
+import org.bloomberg.fx_deals.Context.DuplicateDealsContext;
+import org.bloomberg.fx_deals.Service.DealService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

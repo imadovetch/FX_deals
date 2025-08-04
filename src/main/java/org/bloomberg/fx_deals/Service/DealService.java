@@ -1,17 +1,15 @@
-package org.bloomberg.fx_deals.service;
+package org.bloomberg.fx_deals.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.bloomberg.fx_deals.Annotation.MarkFunction;
 import org.bloomberg.fx_deals.Mapper.DealMapper;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
 import org.bloomberg.fx_deals.Model.Entity.Deal;
-import org.bloomberg.fx_deals.repository.DealRepository;
+import org.bloomberg.fx_deals.Repository.DealRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.ArrayList;

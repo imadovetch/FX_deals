@@ -1,10 +1,10 @@
-package org.bloomberg.fx_deals.service;
+package org.bloomberg.fx_deals.Service;
 
 import org.bloomberg.fx_deals.Mapper.DealMapper;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
 import org.bloomberg.fx_deals.Model.DTO.ImportResultDto;
 import org.bloomberg.fx_deals.Model.Entity.Deal;
-import org.bloomberg.fx_deals.repository.DealRepository;
+import org.bloomberg.fx_deals.Repository.DealRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

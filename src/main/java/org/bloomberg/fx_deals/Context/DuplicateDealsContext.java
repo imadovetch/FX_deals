@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.context;
+package org.bloomberg.fx_deals.Context;
 
 import java.util.List;
 

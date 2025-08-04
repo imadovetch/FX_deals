@@ -1,7 +1,7 @@
 package org.bloomberg.fx_deals.Corevalidation;
 
 import lombok.RequiredArgsConstructor;
-import org.bloomberg.fx_deals.repository.DealRepository;
+import org.bloomberg.fx_deals.Repository.DealRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

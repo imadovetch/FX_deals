@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.config;
+package org.bloomberg.fx_deals.Config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

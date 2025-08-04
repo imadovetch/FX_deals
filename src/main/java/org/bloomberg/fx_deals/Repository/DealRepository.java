@@ -1,4 +1,4 @@
-package org.bloomberg.fx_deals.repository;
+package org.bloomberg.fx_deals.Repository;
 
 import org.bloomberg.fx_deals.Model.Entity.Deal;
 import org.springframework.data.jpa.repository.JpaRepository;

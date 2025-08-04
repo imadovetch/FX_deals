@@ -53,6 +53,15 @@ We use Spring AOP to intercept exceptions and log them cleanly to the console. T
 - **Build Tools**: Maven
 - **Code Quality**: Lombok for boilerplate reduction
 
+### Switching to Custom Annotations
+
+You can easily switch to using custom annotations to leverage aspects in a simple way. The system is designed with the following principles:
+
+- **No Transactional Operations**: If anything fails, it doesn't affect other operations
+- **Request Body Validation First**: Only requires a valid request body as the initial requirement
+- **Aspect-Driven Processing**: Use custom annotations to trigger AOP behavior
+
+
 ## 📊 API Response Types
 
 ### ✅ Successful Import
