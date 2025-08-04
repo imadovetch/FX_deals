@@ -12,9 +12,13 @@ public class SecurityConfig {
 
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
+            "/swagger-ui/**",
             "/swagger-ui.html",
-            "/swagger-ui/**"
+            "/swagger-resources/**",
+            "/webjars/**"
     };
+
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -23,7 +27,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/deals/import").permitAll()
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()  // 🔓 Allow Swagger
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated()
                 )
 

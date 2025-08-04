@@ -1,39 +1,23 @@
-# FX Deals Application
+# Bloomberg FX Deals Data Warehouse - Deal Importer API
 
-A Spring Boot application for importing and managing FX (Foreign Exchange) deals with comprehensive validation, duplicate detection, and robust error handling.
+A robust and scalable REST API for importing FX deal data into Bloomberg's data warehouse system. Built for high-volume financial data processing with comprehensive validation, error handling, and clean architecture using Aspect-Oriented Programming (AOP).
 
 ## 🚀 Features
 
-- **Bulk Deal Import**: Import multiple FX deals in a single API call
-- **Duplicate Detection**: Automatic filtering of duplicate deals using AOP
-- **Comprehensive Validation**: Bean validation with custom business rules
-- **Error Handling**: Graceful error handling with detailed response messages
-- **Audit Trail**: Automatic tracking of creation and modification timestamps
-- **Database Optimization**: Proper indexing and constraints
-- **Docker Support**: Complete containerized deployment
-- **Comprehensive Testing**: Unit tests, integration tests, and API tests
+- **Financial Data Processing**: Specialized for FX deals import and validation
+- **Clean Architecture**: Separation of concerns using AOP for cross-cutting functionality
+- **Comprehensive Validation**: Multi-layer validation with detailed error responses
+- **Duplicate Detection**: Intelligent handling of duplicate deals
+- **Data Warehouse Ready**: Optimized for Bloomberg's analytical requirements
+- **Production Ready**: Comprehensive logging, error handling, and monitoring
 
-## 🏗️ Architecture
-
-### Technology Stack
-
-- **Backend**: Spring Boot 3.5.4
-- **Database**: PostgreSQL 15
-- **ORM**: Spring Data JPA with Hibernate
-- **Validation**: Bean Validation (Jakarta)
-- **Mapping**: MapStruct
-- **AOP**: Spring AOP for cross-cutting concerns
-- **Testing**: JUnit 5, Mockito, TestContainers
-- **Containerization**: Docker & Docker Compose
-- **Build Tool**: Maven
-
-### Project Structure
+## 📁 Project Structure
 
 ```
 FX_deals/
 ├── src/
 │   ├── main/java/org/bloomberg/fx_deals/
-│   │   ├── aspect/           # AOP for duplicate filtering
+│   │   ├── aspect/           # AOP cross-cutting concerns
 │   │   ├── controller/       # REST API endpoints
 │   │   ├── Corevalidation/   # Business validation logic
 │   │   ├── Exceptions/       # Global exception handling
@@ -42,273 +26,163 @@ FX_deals/
 │   │   ├── Model/            # DTOs and Entities
 │   │   ├── repository/       # Data access layer
 │   │   ├── service/          # Business logic
-│   │   └── context/          # Thread-local context
+│   │   ├── context/          # Thread-local context
+│   │   ├── security/         # Security configuration
+│   │   └── config/           # Swagger and app configurations
 │   └── test/                 # Comprehensive test suite
 ├── docker-compose.yml        # Complete deployment stack
 ├── Dockerfile               # Multi-stage build
 ├── sample-data/             # Test data files
-└── scripts/                 # Deployment and testing scripts
+├── scripts/                 # Deployment and testing scripts
+└── Makefile                 # Build automation
+```
+
+## 🧠 AOP for Business Separation
+
+We use Spring AOP to intercept exceptions and log them cleanly to the console. This keeps the business logic focused only on what it needs to do and removes repetitive try-catch blocks.
+
+## 🛠️ Tech Stack
+
+- **Framework**: Spring Boot 3.x
+- **AOP**: Spring AOP for cross-cutting concerns
+- **Validation**: Hibernate Validator with custom annotations
+- **Logging**: SLF4J + Logback
+- **Database**: JPA/Hibernate
+- **Documentation**: Swagger/OpenAPI 3
+- **Containerization**: Docker & Docker Compose
+- **Build Tools**: Maven
+- **Code Quality**: Lombok for boilerplate reduction
+
+## 📊 API Response Types
+
+### ✅ Successful Import
+```json
+{
+    "duplicateDeals": [],
+    "failedDeals": [],
+    "message": "All deals imported successfully. | Success: 2 | Failed: 0 | Duplicates: 0",
+    "successfulDeals": [
+        "DEAL0031",
+        "66666"
+    ]
+}
+```
+
+### ⚠️ Duplicate Deals Detected
+```json
+{
+    "duplicateDeals": [
+        "DEAL0031",
+        "66666"
+    ],
+    "failedDeals": [],
+    "message": "All deals were duplicates and skipped. | Success: 0 | Failed: 0 | Duplicates: 2",
+    "successfulDeals": []
+}
+```
+
+### ❌ Validation Error
+```json
+{
+    "errors": {
+        "0": [
+            {
+                "property": "dealUniqueId",
+                "message": "Deal Unique Id is required"
+            }
+        ]
+    },
+    "status": 400,
+    "type": "Validation Error",
+    "timestamp": "2025-08-04T03:31:06.980127Z"
+}
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Java 17+
+- Docker & Docker Compose
+- Maven 3.6+
 
-- Docker and Docker Compose
-- Java 17 (for local development)
-- Maven (for local development)
-
-### Deployment
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd FX_deals
-   ```
-
-2. **Deploy with Docker Compose**
-   ```bash
-   # Make scripts executable
-   chmod +x scripts/*.sh
-   
-   # Deploy the application
-   ./scripts/deploy.sh
-   ```
-
-3. **Test the API**
-   ```bash
-   # Test with sample data
-   ./scripts/test-api.sh
-   
-   # Or test manually
-   curl -X POST http://localhost:8080/api/deals/import \
-     -H "Content-Type: application/json" \
-     -d @sample-data/deals-sample.json
-   ```
-
-### Local Development
-
-1. **Setup Database**
-   ```bash
-   # Start PostgreSQL
-   docker-compose up postgres -d
-   ```
-
-2. **Run Application**
-   ```bash
-   mvn spring-boot:run
-   ```
-
-3. **Run Tests**
-   ```bash
-   mvn test
-   mvn jacoco:report  # Generate coverage report
-   ```
-
-## 📋 API Documentation
-
-### Import Deals
-
-**Endpoint**: `POST /api/deals/import`
-
-**Request Body**:
-```json
-[
-  {
-    "dealUniqueId": "DEAL001",
-    "fromCurrencyIsoCode": "USD",
-    "toCurrencyIsoCode": "EUR",
-    "dealTimestamp": 1640995200000,
-    "dealAmountInOrderingCurrency": 1000000.00
-  }
-]
+### Option 1: Using Makefile (Recommended)
+```bash
+run : make 
 ```
 
-**Response**:
-```json
-{
-  "message": "All deals imported successfully. | Success: 1 | Failed: 0 | Duplicates: 0",
-  "successfulDeals": ["DEAL001"],
-  "failedDeals": [],
-  "duplicateDeals": []
-}
+### Option 2: Using Shell Script
+```bash
+sh ./scripts/start.sh
 ```
 
-### Validation Rules
+### Option 3: Docker Compose Direct
+```bash
+docker compose up --build
+```
 
-- `dealUniqueId`: Required, max 255 characters
-- `fromCurrencyIsoCode`: Required, exactly 3 uppercase letters
-- `toCurrencyIsoCode`: Required, exactly 3 uppercase letters
-- `dealTimestamp`: Required, positive number (epoch milliseconds)
-- `dealAmountInOrderingCurrency`: Required, > 0, max 15 digits with 2 decimals
+### Option 4: Local Development
+```bash
+mvn clean install
+mvn spring-boot:run
+```
+
+## 📚 API Documentation
+
+Once the application is running, access the interactive API documentation at:
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **OpenAPI Spec**: `http://localhost:8080/v3/api-docs`
 
 ## 🧪 Testing
 
-### Test Coverage
-
-The project includes comprehensive testing with:
-
-- **Unit Tests**: Controller, Service, Mapper, AOP, Helper classes
-- **Integration Tests**: Full application stack testing
-- **API Tests**: End-to-end API testing with various scenarios
-
-### Running Tests
-
+### Run All Tests
 ```bash
-# Run all tests
 mvn test
-
-# Run with coverage
-mvn clean test jacoco:report
-
-# Run specific test categories
-mvn test -Dtest=DealControllerTest
-mvn test -Dtest=DealIntegrationTest
 ```
 
-### Test Scenarios
+### Test Coverage
+The project includes comprehensive test coverage for:
+- Unit tests for business logic
+- Integration tests for API endpoints
+- Validation tests for edge cases
+- Sample data scenarios in `sample-data/` directory
 
-- ✅ Valid deal import
-- ✅ Bulk deal import
-- ✅ Duplicate detection
-- ✅ Validation errors
-- ✅ Empty input handling
-- ✅ Large dataset processing
-- ✅ Error handling
 
-## 🐳 Docker Deployment
+### Aspect-Oriented Programming (AOP)
+- **Logging Aspect**: Automatic exception logging
+- **Performance Monitoring**: Method execution time tracking
+- **Security Aspects**: Cross-cutting security concerns
 
-### Services
-
-- **fx-deals-app**: Spring Boot application (port 8080)
-- **postgres**: PostgreSQL database (port 5432)
-- **pgadmin**: Database management (port 5050, optional)
-
-### Commands
-
-```bash
-# Deploy
-./scripts/deploy.sh
-
-# Stop
-./scripts/deploy.sh stop
-
-# Restart
-./scripts/deploy.sh restart
-
-# View logs
-./scripts/deploy.sh logs
-
-# Clean up
-./scripts/deploy.sh clean
-```
-
-## 📊 Monitoring
-
-### Health Checks
-
-- Application: `http://localhost:8080/actuator/health`
-- Database: Built-in PostgreSQL health check
-- Container: Docker health checks configured
-
-### Logging
-
-- Application logs: `docker-compose logs fx-deals-app`
-- Database logs: `docker-compose logs postgres`
-
-## 🔧 Configuration
 
 ### Environment Variables
+```bash
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=fx_deals
+DB_USERNAME=admin
+DB_PASSWORD=password
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPRING_DATASOURCE_URL` | Database URL | `jdbc:postgresql://postgres:5432/fxdeals` |
-| `SPRING_DATASOURCE_USERNAME` | Database username | `fxuser` |
-| `SPRING_DATASOURCE_PASSWORD` | Database password | `fxpass` |
-| `SPRING_JPA_HIBERNATE_DDL_AUTO` | DDL mode | `update` |
+# Application Configuration
+SERVER_PORT=8080
+LOG_LEVEL=INFO
+```
 
-### Database Configuration
+### Docker Environment
+All configurations are externalized and can be overridden via environment variables or Docker Compose.
 
-- **Database**: PostgreSQL 15
-- **Schema**: Auto-generated from JPA entities
-- **Indexes**: Automatic on frequently queried columns
-- **Audit**: Automatic timestamp tracking
+## 📝 Development Guidelines
 
-## 🛠️ Development
+### Code Style
+- Follow Spring Boot best practices
+- Use Lombok annotations to reduce boilerplate
+- Implement comprehensive validation
+- Write meaningful commit messages
 
-### Code Quality
+### Error Handling
+- All exceptions are logged via AOP
+- Business logic remains clean and focused
+- Detailed error responses for API consumers
 
-- **JaCoCo**: Code coverage reporting (target: 80%)
-- **Checkstyle**: Code style enforcement
-- **SpotBugs**: Static analysis
-- **PMD**: Code quality analysis
 
-### Best Practices
+```
 
-- ✅ Separation of concerns
-- ✅ Dependency injection
-- ✅ AOP for cross-cutting concerns
-- ✅ Comprehensive error handling
-- ✅ Input validation
-- ✅ Database optimization
-- ✅ Security considerations
-- ✅ Comprehensive testing
-
-## 📈 Performance
-
-### Optimizations
-
-- **Database Indexes**: On deal timestamp and currency columns
-- **Batch Processing**: Efficient bulk operations
-- **Connection Pooling**: HikariCP for database connections
-- **Caching**: Entity-level caching where appropriate
-
-### Monitoring
-
-- **Health Checks**: Application and database health monitoring
-- **Logging**: Structured logging with SLF4J
-- **Metrics**: Spring Boot Actuator metrics
-
-## 🔒 Security
-
-### Implemented Measures
-
-- **Input Validation**: Comprehensive bean validation
-- **SQL Injection Prevention**: JPA/Hibernate ORM
-- **Error Handling**: No sensitive information in error messages
-- **Container Security**: Non-root user in Docker containers
-
-## 📝 Sample Data
-
-The `sample-data/deals-sample.json` file contains 10 sample FX deals with various currencies and amounts for testing purposes.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For issues and questions:
-
-1. Check the logs: `./scripts/deploy.sh logs`
-2. Run tests: `./scripts/test-api.sh`
-3. Check health: `curl http://localhost:8080/actuator/health`
-4. Review documentation in this README
-
-## 🔄 Version History
-
-- **v1.0.0**: Initial release with core functionality
-  - Bulk deal import
-  - Duplicate detection
-  - Comprehensive validation
-  - Docker deployment
-  - Complete test suite 

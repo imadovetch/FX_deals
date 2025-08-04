@@ -1,5 +1,7 @@
 package org.bloomberg.fx_deals.controller;
 
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.bloomberg.fx_deals.Helpers.ControllerHelper;
 import org.bloomberg.fx_deals.Model.DTO.DealDto;
@@ -18,6 +20,7 @@ import java.util.Map;
 @RequestMapping("/api/deals")
 @RequiredArgsConstructor
 @Validated
+@Tag(name = "FX Deals", description = "API for managing foreign exchange deals")
 public class DealController {
 
     private final DealService dealService;
@@ -27,6 +30,7 @@ public class DealController {
      * No rollback: saves all valid deals, skips duplicates.
      */
     @PostMapping("/import")
+
     public ResponseEntity<?> importDeals(@Valid @RequestBody List<DealDto> dealDtos) {
         ImportResultDto result = dealService.saveAll(dealDtos);
 
